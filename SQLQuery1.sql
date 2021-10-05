@@ -53,7 +53,7 @@ INSERT dbo.Food
 )
 VALUES
 (   2,   -- id - int
-    N'Gà', -- name - nvarchar(100)
+    N'GÃ ', -- name - nvarchar(100)
     300000,   -- price - int
     1    -- count - int
     )
@@ -73,7 +73,7 @@ INSERT dbo.Account
     PassWord
 )
 VALUES
-(   N'2', -- UserName - nvarchar(100)
+(   N'K', -- UserName - nvarchar(100)
     N'1'  -- PassWord - nvarchar(1000)
     )
 
@@ -81,7 +81,6 @@ SELECT * FROM dbo.Account
 SELECT * FROM dbo.TableFood
 SELECT * FROM dbo.Food
 SELECT * FROM dbo.Bill
-SELECT * FROM dbo.BillInfo WHERE idBill
 DELETE FROM dbo.Bill
 
 
