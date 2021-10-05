@@ -44,6 +44,14 @@ CREATE TABLE Bill
 	FOREIGN KEY (idTable) REFERENCES dbo.TableFood(id)
 )
 Go
+CREATE TABLE OrderFood
+(
+idTable INT NOT NULL,
+idFood INT NOT NULL,
+FOREIGN KEY (idTable) REFERENCES dbo.TableFood(id),
+FOREIGN KEY (idFood) REFERENCES dbo.Food(id)
+)
+GO
 INSERT dbo.Food
 (
     id,
