@@ -11,19 +11,12 @@ class menu():
 		self.count=count
 def giaodienmenu():
 	cursorMenu= conn.cursor()
-	Max=-1
 	cursorMenu.execute('SELECT * FROM Food')
 	print ("ID\t\t\tFOOD\t\t\tPRICE")
 	print ("---------------------------------------------------------------")
 	for i in cursorMenu:
-		if(Max<i[3]):
-			Max=i[3]
 		print ("%s\t\t\t%s\t\t\t%d" % (i[0],i[1],i[2]))
 	print ("---------------------------------------------------------------")
-	cursorMenu.execute('SELECT name FROM Food WHERE count=(?)',(Max))
-	print("Món ăn bán chạy nhất của quán là :")
-	for i in cursorMenu:
-		print(i[0])
 def giaodiengoimon():
 	cursorTable=conn.cursor()
 	kt=0
@@ -66,12 +59,13 @@ def giaodiengoimon():
 		cursorCount=conn.cursor()
 		cursorBillInfo=conn.cursor()
 		cursorMenu= conn.cursor()
-		cursorBill.execute('INSERT INTO Bill(idTable,CheckIn,Checkout,Totalprice,status) VALUES (?,?,?,?,?)',(MaTable,str(datetime.date.today()),'',tongtien,0))
+		cursorBill.execute('INSERT INTO Bill(idTable,CheckIn,Checkout,Totalprice,status) VALUES (?,?,?,?,?)',(MaTable,datetime.datetime.today(),'',tongtien,0))
 		conn.commit()
 		dsmenu=[]
 		while(True):
-			print("Nhập 1 để gọi món")
-			print("Nhập 2 để chốt hoá đơn")
+			print("Nhập 1: để gọi món")
+			print("Nhập 2: để chốt hoá đơn")
+			print("Nhập 3: Exit")
 			test=int(input("Nhập lựa chọn: "))
 			if(test==1):
 				while(True):
@@ -112,12 +106,12 @@ def giaodiengoimon():
 				if(tongtien==0):
 					print("Bạn chưa chọn món nào để chốt hoá đơn!")
 				else:
-					cursorBill.execute('SELECT id FROM Bill WHERE idTable=(?) and status=0',(MaTable))
 					print ("IdTable\t\t\tNAME\t\tSoLuong")
 					for i in dsmenu:
 						print("%d\t\t\t%s\t\t%d" %(i.idfood,i.food,i.count))
 					print("Tổng tiền của bạn là:"+str(tongtien)+" VND")
-					break
+			elif(test==3):
+				break
 			else:
 				print("Nhập sai vui lòng nhập lại lựa chọn!")
 def thaydoi():
@@ -150,8 +144,7 @@ def suamenu():
 		cursorBillInfo=conn.cursor()
 		print("1:Xoá món ăn")
 		print("2:Thêm món ăn")
-		print("3:Thêm bàn")
-		print("4:Exit")
+		print("3:Exit")
 		test=int(input("Nhập lựa chọn: "))
 		if(test==1):
 			kt=True
@@ -169,6 +162,7 @@ def suamenu():
 					cursorMenu.execute('DELETE FROM Food WHERE id=(?)',(maFood))
 					conn.commit()
 					print("Đã xoá thành công.")
+					giaodienmenu()
 					break
 				elif(check=='N' or check=='n'):
 					break
@@ -190,12 +184,24 @@ def suamenu():
 						kt=False
 				if(NUll==0):
 					break
-			while(True):
+			kt=True
+			while(kt):
 				monan=input("Nhập tên món ăn bạn muốn thêm: ")
 				if(monan==''):
 					print("Vui lòng nhập tên món ăn!")
 				else:
-					break
+					NUll=0
+					cursorMenu.execute('SELECT name FROM Food')
+					for i in cursorMenu:
+						NUll=NUll+1
+						if(i[0]==monan):
+							print('Tên này đã có trong menu.Vui lòng nhập lại!')
+							kt=True
+							break
+						else:
+							kt=False
+					if(NUll==0):
+						break
 			while(True):
 				gia=int(input("Nhập giá món ăn: "))
 				if(gia<1):
@@ -207,17 +213,6 @@ def suamenu():
 			print("Thêm món ăn thành công.")
 			giaodienmenu()
 		elif(test==3):
-			cursorTableFood = conn.cursor()
-			while (True):
-				ten=input("Nhập tên bàn bạn muốn thêm: ")
-				if(ten==''):
-					print("Vui lòng nhập tên bàn bạn muốn đặt")
-				else:
-					break
-			cursorTableFood.execute("INSERT INTO TableFood(name,status) VALUES (?,?)",(ten,0))
-			conn.commit()
-			print("Nhập thêm bàn thành công.")
-		elif(test==4):
 			break
 		else:
 			print("Không có lựa chọn này vui lòng chọn lại!")
@@ -286,13 +281,18 @@ def giaodienKhach():
 		else:
 			print("Nhập sai vui lòng nhập lại.")
 def Bill():
+	cursorTable=conn.cursor()
+	Table={}
+	cursorTable.execute('SELECT id,name FROM TableFood')
+	for i in cursorTable:
+		Table[i[0]]=i[1]
 	while(True):
 		cursorBill=conn.cursor()
 		cursorMenu=conn.cursor()
 		cursorBill.execute('SELECT * FROM Bill WHERE status=0' )
-		print ("ID\t\t\tID_TABLE\tCheckIn\t\t\t\tTotal_Price")
+		print ("ID\t\t\tNAME_TABLE\tCheckIn\t\t\t\t\t\tTotal_Price")
 		for i in cursorBill:
-			print ("%d\t\t\t%d\t\t%s\t\t\t%d" % (i[0],i[1],i[2],i[4]))
+			print ("%d\t\t\t%s\t\t%s\t\t\t%d" % (i[0],Table[i[1]],i[2],i[4]))
 		print("1:Chọn hoá đơn thanh toán")
 		print("2:Thoát")
 		test=int(input("Nhập lựa chọn của bạn: "))
@@ -310,7 +310,7 @@ def Bill():
 			cursorBill.execute('SELECT Totalprice FROM Bill WHERE id=(?)',maBill)
 			for i in cursorBill:
 				print("Tổng tiền hoá đơn là:",i[0])
-			cursorBill.execute('UPDATE Bill SET Checkout=(?),status=(?) WHERE id=(?)',(str(datetime.date.today()),1,maBill))
+			cursorBill.execute('UPDATE Bill SET Checkout=(?),status=(?) WHERE id=(?)',(datetime.datetime.today(),1,maBill))
 			conn.commit()
 			cursorTableFood=conn.cursor()
 			cursorTableFood.execute('UPDATE TableFood SET status=(?) WHERE id=(?)',(0,MaTable))
@@ -328,7 +328,7 @@ def checkDoanhthu():
 		print("4:Exit")
 		test=int(input("Nhập lựa chọn của bạn: "))
 		if(test==1):
-			cursorBill.execute('SELECT Totalprice FROM Bill WHERE status=1 And Checkout=(?)',(str(datetime.date.today())))
+			cursorBill.execute('SELECT Totalprice FROM Bill WHERE status=1 And day(Checkout)=(?) and month(Checkout)=(?) and year(Checkout)=(?)',(datetime.date.today().day,datetime.date.today().month,datetime.date.today().year))
 			Tongdoanhso=0
 			for i in cursorBill:
 				Tongdoanhso=Tongdoanhso+i[0]
