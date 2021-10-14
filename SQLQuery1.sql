@@ -54,9 +54,9 @@ FOREIGN KEY (idFood) REFERENCES dbo.Food(id)
 GO
 CREATE TABLE BillInFo
 (
-idTable INT NOT NULL,
+idBill INT NOT NULL,
 idFood INT NOT NULL,
-FOREIGN KEY (idTable) REFERENCES dbo.TableFood(id),
+FOREIGN KEY (idTable) REFERENCES dbo.Bill(id),
 FOREIGN KEY (idFood) REFERENCES dbo.Food(id)
 )
 GO
